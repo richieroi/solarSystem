@@ -1,0 +1,181 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Solar System in A-Frame</title>
+    <script src="script/aframe.min.js"></script>
+    <script>
+      AFRAME.registerComponent('planet-orbit', {
+        schema: {
+          radius: {type: 'number', default: 5},
+          speed: {type: 'number', default: 1},
+          startAngle: {type: 'number', default: 0}
+        },
+        
+        init: function() {
+          this.angle = this.data.startAngle;
+        },
+        
+        tick: function(time, deltaTime) {
+          // Convert deltaTime from milliseconds to seconds and adjust speed
+          const deltaSeconds = deltaTime / 1000;
+          this.angle += this.data.speed * deltaSeconds * 0.2;
+          
+          // Calculate position based on orbit
+          const x = this.data.radius * Math.cos(this.angle);
+          const z = this.data.radius * Math.sin(this.angle);
+          
+          // Update entity position
+          this.el.setAttribute('position', {x: x, y: 0, z: z});
+        }
+      });
+      
+      AFRAME.registerComponent('self-rotate', {
+        schema: {
+          speed: {type: 'number', default: 0.1}
+        },
+        
+        tick: function(time, deltaTime) {
+          const deltaSeconds = deltaTime / 1000;
+          const entity = this.el;
+          const currentRotation = entity.getAttribute('rotation');
+          entity.setAttribute('rotation', {
+            x: currentRotation.x,
+            y: currentRotation.y + (this.data.speed * deltaSeconds * 10),
+            z: currentRotation.z
+          });
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene background="color: #001738">
+      <!-- Asset management system -->
+      <a-assets>
+        <img id="sun-texture" src="textures/2k_sun.jpg">
+        <img id="mercury-texture" src="textures/2k_mercury.jpg">
+        <img id="venus-texture" src="textures/2k_venus_surface.jpg">
+        <img id="venus-atmosphere" src="textures/2k_venus_atmosphere.jpg">
+        <img id="earth-texture" src="textures/2k_earth_daymap.jpg">
+        <img id="moon-texture" src="textures/2k_moon.jpg">
+        <img id="mars-texture" src="textures/2k_mars.jpg">
+        <img id="jupiter-texture" src="textures/2k_jupiter.jpg">
+        <img id="saturn-texture" src="textures/2k_saturn.jpg">
+        <img id="saturn-rings" src="textures/2k_saturn_ring_alpha.png">
+        <img id="uranus-texture" src="textures/2k_uranus.jpg">
+        <img id="neptune-texture" src="textures/2k_neptune.jpg">
+        <img id="stars-texture" src="textures/2k_stars.jpg">
+        <img id="milkyway-texture" src="textures/2k_stars_milky_way.jpg">
+      </a-assets>
+      
+      <!-- Camera setup -->
+      <a-entity position="0 15 30" rotation="-20 0 0">
+        <a-camera></a-camera>
+      </a-entity>
+      
+      <!-- Ambient light for overall scene illumination -->
+      <a-light type="ambient" color="#445" intensity="0.5"></a-light>
+      
+      <!-- Background skybox with stars -->
+      <a-sky src="#milkyway-texture" radius="100"></a-sky>
+      
+      <!-- Sun -->
+      <a-entity position="0 0 0" self-rotate="speed: 0.05">
+        <a-sphere radius="2.5" material="src: #sun-texture; emissive: #FF5500; emissiveIntensity: 2"></a-sphere>
+        <a-light type="point" color="#FFAA33" intensity="1.5" position="0 0 0"></a-light>
+      </a-entity>
+      
+      <!-- Orbit paths (circles) -->
+      <a-entity id="orbit-paths">
+        <a-torus color="#555" radius="4" radius-tubular="0.02" segments-tubular="64" rotation="90 0 0"></a-torus>
+        <a-torus color="#555" radius="6" radius-tubular="0.02" segments-tubular="64" rotation="90 0 0"></a-torus>
+        <a-torus color="#555" radius="8" radius-tubular="0.02" segments-tubular="64" rotation="90 0 0"></a-torus>
+        <a-torus color="#555" radius="10" radius-tubular="0.02" segments-tubular="64" rotation="90 0 0"></a-torus>
+        <a-torus color="#555" radius="13" radius-tubular="0.02" segments-tubular="64" rotation="90 0 0"></a-torus>
+        <a-torus color="#555" radius="17" radius-tubular="0.02" segments-tubular="64" rotation="90 0 0"></a-torus>
+        <a-torus color="#555" radius="21" radius-tubular="0.02" segments-tubular="64" rotation="90 0 0"></a-torus>
+        <a-torus color="#555" radius="24" radius-tubular="0.02" segments-tubular="64" rotation="90 0 0"></a-torus>
+        <a-torus color="#555" radius="27" radius-tubular="0.02" segments-tubular="64" rotation="90 0 0"></a-torus>
+      </a-entity>
+      
+      <!-- Planets -->
+      <!-- Mercury -->
+      <a-entity planet-orbit="radius: 4; speed: 4.1; startAngle: 0" self-rotate="speed: 0.17">
+        <a-sphere radius="0.4" material="src: #mercury-texture">
+          <a-text value="MERCURY" position="0 1 0" scale="0.8 0.8 0.8" align="center" color="white"></a-text>
+        </a-sphere>
+      </a-entity>
+      
+      <!-- Venus -->
+      <a-entity planet-orbit="radius: 6; speed: 1.6; startAngle: 1.2" self-rotate="speed: 0.08">
+        <a-sphere radius="0.6" material="src: #venus-texture">
+          <!-- Venus atmosphere as a slightly larger transparent sphere -->
+          <a-sphere radius="0.65" material="src: #venus-atmosphere; opacity: 0.6; transparent: true"></a-sphere>
+          <a-text value="VENUS" position="0 1.2 0" scale="0.8 0.8 0.8" align="center" color="white"></a-text>
+        </a-sphere>
+      </a-entity>
+      
+      <!-- Earth with Moon -->
+      <a-entity planet-orbit="radius: 8; speed: 1; startAngle: 2.5" self-rotate="speed: 1">
+        <a-sphere radius="0.6" material="src: #earth-texture">
+          <a-text value="EARTH" position="0 1.2 0" scale="0.8 0.8 0.8" align="center" color="white"></a-text>
+        </a-sphere>
+        
+        <!-- Moon -->
+        <a-entity position="1.5 0 0" rotation="0 0 0" self-rotate="speed: 0.27">
+          <a-sphere radius="0.16" material="src: #moon-texture"></a-sphere>
+          <a-text value="MOON" position="0 0.5 0" scale="0.4 0.4 0.4" align="center" color="white"></a-text>
+        </a-entity>
+      </a-entity>
+      
+      <!-- Mars -->
+      <a-entity planet-orbit="radius: 10; speed: 0.5; startAngle: 0.5" self-rotate="speed: 0.9">
+        <a-sphere radius="0.5" material="src: #mars-texture">
+          <a-text value="MARS" position="0 1.1 0" scale="0.8 0.8 0.8" align="center" color="white"></a-text>
+        </a-sphere>
+      </a-entity>
+      
+      <!-- Jupiter -->
+      <a-entity planet-orbit="radius: 13; speed: 0.08; startAngle: 3.7" self-rotate="speed: 2.4">
+        <a-sphere radius="1.2" material="src: #jupiter-texture">
+          <a-text value="JUPITER" position="0 1.8 0" scale="1 1 1" align="center" color="white"></a-text>
+        </a-sphere>
+      </a-entity>
+      
+      <!-- Saturn with rings -->
+      <a-entity planet-orbit="radius: 17; speed: 0.03; startAngle: 5.2" self-rotate="speed: 2.2">
+        <a-entity>
+          <a-sphere radius="1" material="src: #saturn-texture"></a-sphere>
+          
+          <!-- Saturn rings as a flat circle with transparent texture -->
+          <a-entity geometry="primitive: ring; radiusInner: 1.2; radiusOuter: 2.2; segmentsTheta: 64" 
+                 material="src: #saturn-rings; transparent: true; side: double" 
+                 rotation="80 0 0"></a-entity>
+          
+          <a-text value="SATURN" position="0 1.6 0" scale="1 1 1" align="center" color="white"></a-text>
+        </a-entity>
+      </a-entity>
+      
+      <!-- Uranus -->
+      <a-entity planet-orbit="radius: 21; speed: 0.01; startAngle: 1.1" self-rotate="speed: 1.4">
+        <a-sphere radius="0.8" material="src: #uranus-texture">
+          <a-text value="URANUS" position="0 1.5 0" scale="1 1 1" align="center" color="white"></a-text>
+        </a-sphere>
+      </a-entity>
+      
+      <!-- Neptune -->
+      <a-entity planet-orbit="radius: 24; speed: 0.006; startAngle: 2.8" self-rotate="speed: 1.5">
+        <a-sphere radius="0.8" material="src: #neptune-texture">
+          <a-text value="NEPTUNE" position="0 1.5 0" scale="1 1 1" align="center" color="white"></a-text>
+        </a-sphere>
+      </a-entity>
+      
+      <!-- Pluto -->
+      <a-entity planet-orbit="radius: 27; speed: 0.004; startAngle: 4.9" self-rotate="speed: 0.16">
+        <a-sphere radius="0.3" color="#AA8866">
+          <a-text value="PLUTO" position="0 0.9 0" scale="0.6 0.6 0.6" align="center" color="white"></a-text>
+        </a-sphere>
+      </a-entity>
+    </a-scene>
+  </body>
+</html>
